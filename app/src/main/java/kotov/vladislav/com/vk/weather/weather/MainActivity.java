@@ -1,17 +1,18 @@
 package kotov.vladislav.com.vk.weather.weather;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -37,9 +38,6 @@ public class MainActivity extends AppCompatActivity implements AddCityDialogList
         super.onCreate( savedInstanceState );
         setContentView( R.layout.activity_main );
 
-//        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-//        setSupportActionBar(toolbar);
-
         cityTextView = (TextView) findViewById(R.id.city_field);
         updatedTextView = (TextView) findViewById(R.id.updated_field);
         detailsTextView = (TextView) findViewById(R.id.details_field);
@@ -47,6 +45,8 @@ public class MainActivity extends AppCompatActivity implements AddCityDialogList
         weatherIcon = (TextView) findViewById(R.id.weather_icon);
         weatherFont = Typeface.createFromAsset(getAssets(), FONT_FILENAME);
         weatherIcon.setTypeface(weatherFont);
+
+        loadPrefs();
 
     }
 
@@ -117,6 +117,9 @@ public class MainActivity extends AppCompatActivity implements AddCityDialogList
         } catch (Exception e) {
             Log.d(LOG_TAG, "One or more fields not found in the JSON data");//FIXME Обработка ошибки
         }
+
+        SharedPreferences sharedPref = getSharedPreferences("TestPreferences" , Context.MODE_PRIVATE);
+        saveToSharedPreferences(sharedPref);
     }
 
     private void setWeatherIcon(long actualId, long sunrise, long sunset) {
@@ -128,9 +131,11 @@ public class MainActivity extends AppCompatActivity implements AddCityDialogList
             if (currentTime >= sunrise && currentTime < sunset) {
                 icon = getString(R.string.weather_sunny);
                 view.setBackgroundResource(R.drawable.sunny);
+                textColorChange(2);
             } else {
                 icon = getString(R.string.weather_clear_night);
                 view.setBackgroundResource(R.drawable.clear_night);
+                textColorChange(1);
             }
         } else {
             Log.d(LOG_TAG, "id " + id);
@@ -138,26 +143,32 @@ public class MainActivity extends AppCompatActivity implements AddCityDialogList
                 case 2:
                     icon = getString(R.string.weather_thunder);
                     view.setBackgroundResource(R.drawable.thunder);
+                    textColorChange(1);
                     break;
                 case 3:
                     icon = getString(R.string.weather_drizzle);
                     view.setBackgroundResource(R.drawable.drizzle);
+                    textColorChange(2);
                     break;
                 case 5:
                     icon = getString(R.string.weather_rainy);
                     view.setBackgroundResource(R.drawable.rainy);
+                    textColorChange(2);
                     break;
                 case 6:
                     icon = getString(R.string.weather_snowy);
                     view.setBackgroundResource(R.drawable.snowy);
+                    textColorChange(2);
                     break;
                 case 7:
                     icon = getString(R.string.weather_foggy);
                     view.setBackgroundResource(R.drawable.foggy);
+                    textColorChange(2);
                     break;
                 case 8:
                     icon = getString(R.string.weather_cloudy);
                     view.setBackgroundResource(R.drawable.cloudy);
+                    textColorChange(1);
                     break;
                 default:
                     break;
@@ -169,5 +180,41 @@ public class MainActivity extends AppCompatActivity implements AddCityDialogList
     @Override
     public void onChangeCity(String city) {
         updateWeatherData(city);
+    }
+
+    private void textColorChange(int color) {
+        switch (color) {
+            case 1:
+                weatherIcon.setTextColor( Color.WHITE );
+                cityTextView.setTextColor( Color.WHITE );
+                updatedTextView.setTextColor( Color.WHITE );
+                detailsTextView.setTextColor( Color.WHITE );
+                currentTemperatureTextView.setTextColor( Color.WHITE );
+                weatherIcon.setTextColor( Color.WHITE );
+                break;
+            case 2:
+                weatherIcon.setTextColor( Color.BLACK );
+                cityTextView.setTextColor( Color.BLACK );
+                updatedTextView.setTextColor( Color.BLACK );
+                detailsTextView.setTextColor( Color.BLACK );
+                currentTemperatureTextView.setTextColor( Color.BLACK );
+                weatherIcon.setTextColor( Color.BLACK );
+                break;
+        }
+    }
+
+    private void saveToSharedPreferences(SharedPreferences sharedPref) {
+
+        if((cityTextView != null) && !(cityTextView.getText().toString().isEmpty())) {
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putString(getString(R.string.shared_prefs_key_text), cityTextView.getText().toString());
+            editor.apply();
+        }
+    }
+
+    private void loadPrefs() {
+        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+        String loadedPrefs = sharedPref.getString(getString(R.string.shared_prefs_key_text),getString(R.string.pref));
+        updateWeatherData(loadedPrefs);
     }
 }

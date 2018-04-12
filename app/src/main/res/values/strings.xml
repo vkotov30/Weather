@@ -21,4 +21,8 @@
 
     <string name="owm_app_id">ae400134d78f72f72e8dfd0dfbb647ea</string>
 
+    <string name="shared_prefs_key_text">key_text</string>
+
+    <string name="pref">Preference</string>
+
 </resources>
